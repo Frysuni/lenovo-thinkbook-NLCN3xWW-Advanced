@@ -1,5 +1,5 @@
 {
-  description = "UEFI BIOS analysis tools for the Lenovo NLCN38WW package";
+  description = "ThinkBook NLCN3xWW Advanced BIOS menu unlock — patcher, analysis tooling, and Ghidra dev shell";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -18,6 +18,7 @@
           pkgs.python3Packages.capstone
           pkgs.cmake
           pkgs.file
+          pkgs.gh
           pkgs.ghidra
           pkgs.git
           pkgs.gnumake

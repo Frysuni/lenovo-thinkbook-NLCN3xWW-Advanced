@@ -1,6 +1,6 @@
 # ThinkBook Advanced BIOS Menu Unlock
 
-**English** · [Русский](README.md)
+**English** · [Русский](README.md) · Discussion (RU): [4pda topic](https://4pda.to/forum/index.php?showtopic=1083187&view=findpost&p=143816575)
 
 Restore the hidden **Advanced** tab (and other hidden FormSets) in the Lenovo
 BIOS Setup on Insyde/Byosoft firmware that removed it — **at runtime, without
@@ -64,8 +64,13 @@ Full analysis: [docs/02-root-cause.md](docs/02-root-cause.md).
 | `patcher/Makefile` | Reproducible build (via the Nix dev shell). |
 | `patcher/prebuilt/BiosAdvancedPatch.efi` | Ready-to-run binary; SHA256 in [docs/04](docs/04-build-and-run.md). |
 | `patcher/analyze_formbrowser.py` | Offline tool that locates the filter in any firmware build and emits the exact patch. |
-| `docs/` | Overview, root cause, reproduction, build/run, version matrix, safety, downloads. |
-| `flake.nix` | Nix dev shell with the full toolchain (gnu-efi, capstone, UEFITool, …). |
+| `scripts/extract-from-bios.sh` | Pull `SetupUtilityApp.efi` + `H2OFormBrowserDxe.efi` out of a BIOS package and analyze them. |
+| `scripts/decompile.sh` | Ghidra headless decompilation of a module. |
+| `scripts/make-release.sh` | Publish a GitHub release with the prebuilt attached. |
+| `research/` | Ghidra scripts + annotated decompilation of the filter functions. |
+| `docs/` | Overview, root cause, reproduction, build/run, version matrix, safety, downloads, UEFI Shell. |
+| `CONTRIBUTING.md` | How to add support for a new BIOS version/model. |
+| `flake.nix` | Nix dev shell with the full toolchain (gnu-efi, capstone, UEFITool, Ghidra, gh, …). |
 
 The patcher is **self-targeting**: it locates `H2OFormBrowserDxe` through the
 `EFI_FORM_BROWSER2_PROTOCOL` it owns and scans only that module for the filter
