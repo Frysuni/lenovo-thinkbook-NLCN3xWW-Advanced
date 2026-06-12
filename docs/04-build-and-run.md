@@ -16,11 +16,13 @@ Both files go on a **FAT32** USB stick (root or any folder).
 
 ```
 patcher/prebuilt/BiosAdvancedPatch.efi
-SHA256: ff7262006046203ccd239658eda0b98f8f9c1133a8b8cd972f9ba12df3126ad4
+SHA256: eb0c1d6e4ded03db4a86bcd26f1cddd5be274ccab31331d1473211d7574346e6
 ```
 
 This is a reproducible build (PE timestamp zeroed); rebuilding in the Nix dev
-shell yields the same hash.
+shell yields the same hash. One binary covers **NLCN37/38/39** — those builds
+ship a byte-identical form browser, so there is no per-version binary (verified
+on NLCN38WW and NLCN39WW).
 
 ## Building from source
 
@@ -61,7 +63,8 @@ is, but `connect -r` guarantees it.
 `BiosAdvancedPatch.efi` prints something like:
 
 ```
-=== BiosAdvancedPatch v4 ===
+=== BiosAdvancedPatch v5 ===
+Verified: ThinkBook G6+ AHP  NLCN37/38/39 (same form browser).
 Locating the form browser and disabling the Advanced-tab filter.
 
 FormBrowser2 at 0x...., SendForm=0x....

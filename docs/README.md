@@ -9,7 +9,11 @@
 | 5 | [Cross-version matrix](05-cross-version-matrix.md) | Which `NLCN` builds hide Advanced, with module hashes and offsets. |
 | 6 | [Safety & limitations](06-safety-and-limitations.md) | What it does/doesn't touch, volatility, Secure Boot, real risks. |
 | 7 | [Firmware downloads](07-firmware-downloads.md) | Where to get the BIOS packages and how to extract the needed files. |
+| 8 | [UEFI Shell access](08-uefi-shell-access.md) | How to reach the UEFI Shell from Windows or Linux (USB prep, boot keys, Secure Boot). |
 
-New here? Start with the [Overview](01-overview.md), then [Build &
+🇷🇺 Документация на русском: [docs/ru/](ru/README.md)
+
+New here? Start with the [Overview](01-overview.md), then
+[UEFI Shell access](08-uefi-shell-access.md) and [Build &
 run](04-build-and-run.md) to use it, or [Root cause](02-root-cause.md) for the
 full technical story.

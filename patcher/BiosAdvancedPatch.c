@@ -1,5 +1,10 @@
 /*
- * BiosAdvancedPatch.efi  (v4)
+ * BiosAdvancedPatch.efi  (v5)
+ *
+ * Verified on ThinkBook 16 G6+ AHP, BIOS NLCN38WW and NLCN39WW. Those two ship
+ * a byte-identical H2OFormBrowserDxe and SetupUtilityApp, so one binary covers
+ * both (and NLCN37WW, which is identical too). For any other build, confirm
+ * with analyze_formbrowser.py first.
  *
  * Restores the hidden "Advanced" tab in the Lenovo SetupUtilityApp on
  * Insyde/Byosoft firmware that hides it, by neutralising one instruction in
@@ -161,7 +166,8 @@ efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
     CHAR16            hb[17];
 
     InitializeLib(ImageHandle, SystemTable);
-    Print(L"\r\n=== BiosAdvancedPatch v4 ===\r\n");
+    Print(L"\r\n=== BiosAdvancedPatch v5 ===\r\n");
+    Print(L"Verified: ThinkBook G6+ AHP  NLCN37/38/39 (same form browser).\r\n");
     Print(L"Locating the form browser and disabling the Advanced-tab filter.\r\n\r\n");
 
     /* Handle buffer is needed by both the structural and the fallback paths. */

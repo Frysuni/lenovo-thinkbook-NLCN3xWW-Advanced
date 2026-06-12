@@ -1,98 +1,106 @@
-# ThinkBook Advanced BIOS Menu Unlock
+# Разблокировка меню Advanced в BIOS ThinkBook
 
-Restore the hidden **Advanced** tab (and other hidden FormSets) in the Lenovo
-BIOS Setup on Insyde/Byosoft firmware that removed it — **at runtime, without
-reflashing or downgrading**, using the laptop's own unmodified
-`SetupUtilityApp`.
+[English](README.en.md) · **Русский**
 
-Developed and verified on the **Lenovo ThinkBook 16 G6+ AHP** (type 21LG, BIOS
-family `NLCN`). The same mechanism applies to the ThinkBook 14 G6+ AHP and, via
-the included analysis tool, to other models on the same form-browser code.
+Возвращает скрытую вкладку **Advanced** (и другие скрытые FormSet) в настройке
+BIOS Lenovo на прошивке Insyde/Byosoft, которая её убрала — **во время работы,
+без перепрошивки и отката**, используя собственную немодифицированную
+`SetupUtilityApp` ноутбука.
 
-> **Status:** working and confirmed on hardware (NLCN38WW). The patch is
-> volatile — it lives in RAM for one boot and disappears on reset. Flash is
-> never written.
+Разработано и проверено на **Lenovo ThinkBook 16 G6+ AHP** (тип 21LG, семейство
+BIOS `NLCN`). Тот же механизм применим к ThinkBook 14 G6+ AHP и, через включённый
+инструмент анализа, к другим моделям на том же коде браузера форм.
 
----
-
-## TL;DR
-
-```
-# In the UEFI Shell, from a USB stick that holds both files:
-FS0:\> connect -r                       # make sure the form browser is loaded
-FS0:\> BiosAdvancedPatch.efi            # disables the "hide Advanced" filter
-FS0:\> SetupUtilityApp.efi              # your laptop's own Setup app — Advanced now shows
-```
-
-`BiosAdvancedPatch.efi` finds the resident form-browser driver in memory and
-NOPs the single instruction that hides flag=0 FormSets, then reads the bytes
-back to prove the change landed. You then launch the **stock** Lenovo
-`SetupUtilityApp` and the Advanced tab is there.
-
-See [docs/04-build-and-run.md](docs/04-build-and-run.md) for the full procedure
-and the on-screen output to expect.
+> **Статус:** работает и подтверждено на железе — **NLCN38WW**, а **NLCN39WW** —
+> по побайтовой идентичности модулей. Один бинарь покрывает NLCN37/38/39. Патч
+> временный — живёт в ОЗУ одну загрузку и исчезает при сбросе. Флеш не пишется
+> никогда.
 
 ---
 
-## Why the Advanced tab vanished
+## Коротко
 
-Between BIOS `NLCN36WW` and `NLCN37WW`, Lenovo's `H2OFormBrowserDxe` gained one
-instruction in its FormSet-sorting routine:
+```
+# В UEFI Shell, с флешки, на которой оба файла:
+FS0:\> connect -r                       # убедиться, что браузер форм загружен
+FS0:\> BiosAdvancedPatch.efi            # отключает фильтр «спрятать Advanced»
+FS0:\> SetupUtilityApp.efi              # своя утилита настройки — Advanced теперь виден
+```
+
+`BiosAdvancedPatch.efi` находит резидентный драйвер браузера форм в памяти и
+заменяет на NOP единственную инструкцию, прячущую FormSet с флагом = 0, затем
+читает байты обратно, чтобы доказать, что изменение прошло. Дальше вы запускаете
+**штатную** `SetupUtilityApp` Lenovo — и вкладка Advanced на месте.
+
+Полная процедура и ожидаемый вывод на экране — в
+[docs/ru/04-build-and-run.md](docs/ru/04-build-and-run.md). Как попасть в UEFI
+Shell из Windows/Linux — в [docs/ru/08-uefi-shell-access.md](docs/ru/08-uefi-shell-access.md).
+
+---
+
+## Почему вкладка Advanced пропала
+
+Между BIOS `NLCN36WW` и `NLCN37WW` в процедуре сортировки FormSet драйвера
+`H2OFormBrowserDxe` появилась одна инструкция:
 
 ```asm
-cmp byte ptr [rbx+0x10], 0   ; read the FormSet's "show" flag
-jz  <backward>               ; flag == 0  ->  skip this FormSet
+cmp byte ptr [rbx+0x10], 0   ; читает флаг «показывать» у FormSet
+jz  <назад>                  ; флаг == 0  ->  пропустить этот FormSet
 ```
 
-The Advanced FormSet has always shipped with `flag = 0`. Older firmware had no
-such check and showed it; newer firmware silently drops it from every
-`SendForm()` call. The fix is to turn that conditional jump into two `NOP`s, so
-every FormSet passes — exactly how the pre-NLCN37 firmware behaved.
+FormSet Advanced всегда поставлялся с `flag = 0`. В старой прошивке такой
+проверки не было, и он показывался; новая молча выбрасывает его из каждого вызова
+`SendForm()`. Исправление — превратить этот условный переход в два `NOP`, чтобы
+проходили все FormSet — ровно как вела себя прошивка до NLCN37.
 
-Full analysis: [docs/02-root-cause.md](docs/02-root-cause.md).
+Полный разбор: [docs/ru/02-root-cause.md](docs/ru/02-root-cause.md).
 
 ---
 
-## What's in here
+## Что внутри
 
-| Path | What it is |
+| Путь | Что это |
 |---|---|
-| `patcher/BiosAdvancedPatch.c` | The runtime UEFI patcher (gnu-efi). |
-| `patcher/Makefile` | Reproducible build (via the Nix dev shell). |
-| `patcher/prebuilt/BiosAdvancedPatch.efi` | Ready-to-run binary; SHA256 in [docs/04](docs/04-build-and-run.md). |
-| `patcher/analyze_formbrowser.py` | Offline tool that locates the filter in any firmware build and emits the exact patch. |
-| `docs/` | Overview, root cause, reproduction, build/run, version matrix, safety, downloads. |
-| `flake.nix` | Nix dev shell with the full toolchain (gnu-efi, capstone, UEFITool, …). |
+| `patcher/BiosAdvancedPatch.c` | Рантайм-патчер UEFI (gnu-efi). |
+| `patcher/Makefile` | Воспроизводимая сборка (через dev-окружение Nix). |
+| `patcher/prebuilt/BiosAdvancedPatch.efi` | Готовый бинарь; SHA256 в [docs/ru/04](docs/ru/04-build-and-run.md). |
+| `patcher/analyze_formbrowser.py` | Оффлайн-инструмент: находит фильтр в любой сборке прошивки и выдаёт точный патч. |
+| `docs/` | Обзор, первопричина, воспроизведение, сборка/запуск, матрица версий, безопасность, загрузки, UEFI Shell. |
+| `flake.nix` | Dev-окружение Nix с полным инструментарием (gnu-efi, capstone, UEFITool, …). |
 
-The patcher is **self-targeting**: it locates `H2OFormBrowserDxe` through the
-`EFI_FORM_BROWSER2_PROTOCOL` it owns and scans only that module for the filter
-*idiom* (not a fixed byte string), so it adapts to other versions and similar
-models. A known-good exact anchor for the G6+ AHP family is kept as a fallback.
-
----
-
-## Documentation
-
-1. [Overview](docs/01-overview.md) — the problem and the approach.
-2. [Root cause](docs/02-root-cause.md) — the instruction, the flag table, the call path.
-3. [Reproduce the analysis](docs/03-reproduce-analysis.md) — derive/verify the patch for any firmware.
-4. [Build & run](docs/04-build-and-run.md) — build, USB prep, UEFI Shell steps, troubleshooting.
-5. [Version matrix](docs/05-cross-version-matrix.md) — which builds hide Advanced, with hashes.
-6. [Safety & limitations](docs/06-safety-and-limitations.md) — what it does and does not do.
-7. [Firmware downloads](docs/07-firmware-downloads.md) — where to get the BIOS packages.
+Патчер **самонаводящийся**: находит `H2OFormBrowserDxe` через протокол
+`EFI_FORM_BROWSER2_PROTOCOL`, которым тот владеет, и сканирует только этот модуль
+на *идиому* фильтра (а не фиксированную строку байт), поэтому адаптируется к
+другим версиям и схожим моделям. Точный проверенный якорь для семейства G6+ AHP
+оставлен как запасной вариант.
 
 ---
 
-## Safety
+## Документация
 
-This tool only flips one conditional jump in a **copy of the form browser that
-already runs in RAM**. It does not write flash, does not change NVRAM, and is
-undone by any reset. It cannot brick the machine. Read
-[docs/06-safety-and-limitations.md](docs/06-safety-and-limitations.md) before
-use, and understand that changing hidden Advanced/CBS settings can still make
-your system unbootable — that risk is on you, not on the patch.
+1. [Обзор](docs/ru/01-overview.md) — проблема и подход.
+2. [Первопричина](docs/ru/02-root-cause.md) — инструкция, таблица флагов, путь вызова.
+3. [Воспроизведение анализа](docs/ru/03-reproduce-analysis.md) — вывести/проверить патч для любой прошивки.
+4. [Сборка и запуск](docs/ru/04-build-and-run.md) — сборка, подготовка флешки, шаги в UEFI Shell, диагностика.
+5. [Матрица версий](docs/ru/05-cross-version-matrix.md) — какие сборки прячут Advanced, с хешами.
+6. [Безопасность и ограничения](docs/ru/06-safety-and-limitations.md) — что делает и чего не делает.
+7. [Загрузка прошивок](docs/ru/07-firmware-downloads.md) — где взять пакеты BIOS.
+8. [Вход в UEFI Shell](docs/ru/08-uefi-shell-access.md) — как попасть в UEFI Shell из Windows или Linux.
 
-## License
+English documentation: **[docs/](docs/README.md)**.
 
-[MIT](LICENSE). Contains no Lenovo or Insyde code; firmware must be obtained
-from the vendor.
+---
+
+## Безопасность
+
+Инструмент лишь переключает один условный переход в **копии браузера форм,
+которая уже работает в ОЗУ**. Он не пишет флеш, не меняет NVRAM и отменяется
+любым сбросом. «Окирпичить» машину он не может. Прочитайте
+[docs/ru/06-safety-and-limitations.md](docs/ru/06-safety-and-limitations.md)
+перед использованием и учтите: изменение скрытых настроек Advanced/CBS всё ещё
+может сделать систему незагружаемой — этот риск на вас, а не на патче.
+
+## Лицензия
+
+[MIT](LICENSE). Не содержит кода Lenovo или Insyde; прошивку нужно получать у
+производителя.

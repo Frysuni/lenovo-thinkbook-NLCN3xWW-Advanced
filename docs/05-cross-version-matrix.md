@@ -25,8 +25,21 @@ for the **ThinkBook 14/16 G6+ AHP** (`NLCN` family).
   reachable. NLCN37 introduced it.
 - **NLCN37/38/39 ship a byte-identical `H2OFormBrowserDxe`** (same SHA256), so
   the same patch — and the same exact 9-byte fallback anchor
-  `ff 50 48 80 7b 10 00 74 de` — applies to all three. The patcher was confirmed
-  on hardware against NLCN38WW.
+  `ff 50 48 80 7b 10 00 74 de` — applies to all three. The released
+  `BiosAdvancedPatch.efi` (v5) is a single binary that covers all three; there
+  is no per-version build.
+- **NLCN38 and NLCN39 were cross-checked at the module level** and are identical
+  in every place that matters to this patch:
+
+  | Module | NLCN38 SHA256 (16) | NLCN39 SHA256 (16) | |
+  |---|---|---|---|
+  | `H2OFormBrowserDxe` (PE32) | `2c36d96f8d6d20aa` | `2c36d96f8d6d20aa` | identical |
+  | `SetupUtilityApp` (PE32) | `a62eb87d9fcdd5fc` | `a62eb87d9fcdd5fc` | identical |
+
+  The Advanced FormSet (`C6D4769E-…`) is present in the NLCN39 Setup IFR with the
+  same GUID, and the `EFI_FORM_BROWSER2_PROTOCOL` GUID the patcher uses to
+  self-locate is present in the driver. The patch was confirmed on hardware on
+  NLCN38WW; NLCN39WW is covered by this byte-level identity.
 - Identical SHA256 across NLCN33/35/36 (and across NLCN22/23) just means the
   driver was not rebuilt between those releases.
 
