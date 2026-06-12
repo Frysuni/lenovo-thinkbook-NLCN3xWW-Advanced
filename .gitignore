@@ -1,0 +1,38 @@
+# ---------------------------------------------------------------------------
+# Lenovo firmware and anything derived from it — copyrighted, NEVER commit.
+# Kept locally as the analysis base; see docs/07-firmware-downloads.md.
+# ---------------------------------------------------------------------------
+*.exe
+*.bin
+*.bin.*
+NLCN*.txt
+/extracted/
+/old_versions/
+/binwalk_extract/
+/ifr/
+/ifr_old/
+
+# Local research trail (intermediate dumps, Ghidra output, extracted modules,
+# experimental binaries). Regenerable; out of scope for the release.
+/analysis/
+
+# Third-party tools (fetch separately — see docs/03-reproduce-analysis.md)
+/tools/
+
+# ---------------------------------------------------------------------------
+# Build artifacts (the prebuilt binary under patcher/prebuilt/ IS committed)
+# ---------------------------------------------------------------------------
+/patcher/*.o
+/patcher/*.so
+/patcher/BiosAdvancedPatch.efi
+__pycache__/
+*.pyc
+
+# ---------------------------------------------------------------------------
+# Environment / tooling
+# ---------------------------------------------------------------------------
+/result
+/result-*
+.direnv/
+.codebase-memory/
+.claude/
